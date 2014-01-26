@@ -61,7 +61,7 @@ class OpencorporatesBot < SimpleOpencBot
     data = [{:name => "A", :type => "B"}]
     data.each do |datum|
       yield OpencorporatesBotRecord.new(
-        datum.merge(:reporting_date => Time.now.iso8601(2)))
+        datum.merge(:reporting_date => Time.now.utc.iso8601(2)))
     end
   end
 end

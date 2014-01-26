@@ -161,4 +161,9 @@ So I rename the project directory to `opencorporates_bot` as well, and at last i
     opencorporates_bot $ bundle exec openc_bot rake bot:run
     .Got 1 records
 
+## Writing the scraper
+
+I check the list of supported schemas, and the most appropriate schema seems to be *Financial licence*.
+
+It seems to me that the timezone of the machine running the scraper is irrelevant, and that the reporting date would therefore be better to be recorded in UTC. I change the code accordingly.
 
