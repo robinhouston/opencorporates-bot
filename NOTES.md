@@ -122,3 +122,7 @@ Okay. That worked, and the rake task ran apparently successfully. Then I ran `su
     Make sure that `gem install debugger -v '1.6.5'` succeeds before bundling.
 
 The problem appears to be [this issue](https://github.com/cldwalker/debugger/issues/105), for which the only proposed solution is to reinstall Ruby using rvm.
+
+So I reinstall Ruby 2.0 using rvm, and then rerun `bundle install`: no need for the sudo this time, of course.
+
+
