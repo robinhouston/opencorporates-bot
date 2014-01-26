@@ -5,7 +5,7 @@ require 'simple_openc_bot'
 # require 'nokogiri'
 # require 'mechanize'
 
-class Opencorporates-botRecord < SimpleOpencBot::BaseLicenceRecord
+class OpencorporatesBotRecord < SimpleOpencBot::BaseLicenceRecord
   # The JSON schema to use to validate records; correspond with files
   # in `schema/*-schema.json`
   schema :licence
@@ -51,16 +51,16 @@ class Opencorporates-botRecord < SimpleOpencBot::BaseLicenceRecord
 
 end
 
-class Opencorporates-bot < SimpleOpencBot
+class OpencorporatesBot < SimpleOpencBot
 
   # the class that `fetch_records` yields. Must be defined.
-  yields Opencorporates-botRecord
+  yields OpencorporatesBotRecord
 
   # This method should yield Records. It must be defined.
   def fetch_all_records(opts={})
     data = [{:name => "A", :type => "B"}]
     data.each do |datum|
-      yield Opencorporates-botRecord.new(
+      yield OpencorporatesBotRecord.new(
         datum.merge(:reporting_date => Time.now.iso8601(2)))
     end
   end

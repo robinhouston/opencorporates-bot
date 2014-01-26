@@ -125,4 +125,40 @@ The problem appears to be [this issue](https://github.com/cldwalker/debugger/iss
 
 So I reinstall Ruby 2.0 using rvm, and then rerun `bundle install`: no need for the sudo this time, of course.
 
+Great! It’s all installed. So let’s run the sample bot:
+
+    opencorporates-bot $ bundle exec openc_bot rake bot:run
+    /Users/robin/.rvm/gems/ruby-2.0.0-p353/bundler/gems/openc_bot-efe710e31208/lib/openc_bot/tasks.rb:88:in `require_relative': /Users/robin/Dropbox/Side projects/opencorporates-bot/lib/opencorporates-bot.rb:8: syntax error, unexpected '-', expecting '<' or ';' or '\n' (SyntaxError)
+    class Opencorporates-botRecord < SimpleOpencBot::BaseLicenceRecord
+                         ^
+    /Users/robin/Dropbox/Side projects/opencorporates-bot/lib/opencorporates-bot.rb:54: syntax error, unexpected '-', expecting '<' or ';' or '\n'
+    class Opencorporates-bot < SimpleOpencBot
+                         ^
+    	from /Users/robin/.rvm/gems/ruby-2.0.0-p353/bundler/gems/openc_bot-efe710e31208/lib/openc_bot/tasks.rb:88:in `block (3 levels) in <top (required)>'
+    	from /Users/robin/.rvm/gems/ruby-2.0.0-p353/bundler/gems/openc_bot-efe710e31208/lib/openc_bot/tasks.rb:311:in `only_process_running'
+    	from /Users/robin/.rvm/gems/ruby-2.0.0-p353/bundler/gems/openc_bot-efe710e31208/lib/openc_bot/tasks.rb:63:in `block (2 levels) in <top (required)>'
+    	from /Users/robin/.rvm/rubies/ruby-2.0.0-p353/lib/ruby/2.0.0/rake/task.rb:228:in `call'
+    	from /Users/robin/.rvm/rubies/ruby-2.0.0-p353/lib/ruby/2.0.0/rake/task.rb:228:in `block in execute'
+    	from /Users/robin/.rvm/rubies/ruby-2.0.0-p353/lib/ruby/2.0.0/rake/task.rb:223:in `each'
+    	from /Users/robin/.rvm/rubies/ruby-2.0.0-p353/lib/ruby/2.0.0/rake/task.rb:223:in `execute'
+    	from /Users/robin/.rvm/rubies/ruby-2.0.0-p353/lib/ruby/2.0.0/rake/task.rb:166:in `block in invoke_with_call_chain'
+    	from /Users/robin/.rvm/rubies/ruby-2.0.0-p353/lib/ruby/2.0.0/monitor.rb:211:in `mon_synchronize'
+    	from /Users/robin/.rvm/rubies/ruby-2.0.0-p353/lib/ruby/2.0.0/rake/task.rb:159:in `invoke_with_call_chain'
+    	from /Users/robin/.rvm/rubies/ruby-2.0.0-p353/lib/ruby/2.0.0/rake/task.rb:152:in `invoke'
+    	from /Users/robin/.rvm/rubies/ruby-2.0.0-p353/lib/ruby/2.0.0/rake/application.rb:143:in `invoke_task'
+    	from /Users/robin/.rvm/gems/ruby-2.0.0-p353/bundler/gems/openc_bot-efe710e31208/bin/openc_bot:12:in `<top (required)>'
+    	from /Users/robin/.rvm/gems/ruby-2.0.0-p353/bin/openc_bot:23:in `load'
+    	from /Users/robin/.rvm/gems/ruby-2.0.0-p353/bin/openc_bot:23:in `<main>'
+    	from /Users/robin/.rvm/gems/ruby-2.0.0-p353/bin/ruby_executable_hooks:15:in `eval'
+    	from /Users/robin/.rvm/gems/ruby-2.0.0-p353/bin/ruby_executable_hooks:15:in `<main>'
+
+Oh dear. It doesn’t like the fact my directory name has a dash in, apparently. I rename `lib/opencorporates-bot.rb` to `lib/opencorporates_bot.rb` and correct the class names. This still doesn’t work:
+
+    /Users/robin/.rvm/gems/ruby-2.0.0-p353/bundler/gems/openc_bot-efe710e31208/lib/openc_bot/tasks.rb:88:in `require_relative': cannot load such file -- /Users/robin/Dropbox/Side projects/opencorporates-bot/lib/opencorporates-bot (LoadError)
+
+So I rename the project directory to `opencorporates_bot` as well, and at last it appears to work:
+
+    opencorporates_bot $ bundle exec openc_bot rake bot:run
+    .Got 1 records
+
 
