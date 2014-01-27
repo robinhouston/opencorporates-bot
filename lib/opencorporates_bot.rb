@@ -1,9 +1,13 @@
 # encoding: UTF-8
 require 'simple_openc_bot'
 
-# you may need to require other libraries here
-# require 'nokogiri'
-# require 'mechanize'
+require 'mechanize'
+
+
+JURISDICTION = "vg"
+URL = "http://www.bvifsc.vg/en-au/regulatedentities.aspx"
+ROW_RE = %r{\A\s*<tr>\s*<td>\s*<a id="dnn_ctr1025_Default_gvSearchResult[^>]+>([^<]+)</a>\s*</td>\s*<td>\s*<a\s[^>]*>([^<]+)}
+
 
 class OpencorporatesBotRecord < SimpleOpencBot::BaseLicenceRecord
   # The JSON schema to use to validate records; correspond with files
@@ -12,7 +16,7 @@ class OpencorporatesBotRecord < SimpleOpencBot::BaseLicenceRecord
 
   # Fields you define here will be persisted to a local database when
   # 'fetch_records' (see below) is run.
-  store_fields :name, :type, :reporting_date
+  store_fields :name, :license_type, :reporting_date
 
   # This is the field(s) which will uniquely define a record (think
   # primary key in a database).
@@ -35,15 +39,15 @@ class OpencorporatesBotRecord < SimpleOpencBot::BaseLicenceRecord
       sample_date: last_updated_at,
       company: {
         name: name,
-        jurisdiction: "xx",
+        jurisdiction: JURISDICTION,
       },
-      source_url: "xx",
+      source_url: URL,
       data: [{
         data_type: :licence,
         properties: {
-          jurisdiction_code: "xx",
+          jurisdiction_code: JURISDICTION,
           category: 'Financial',
-          jurisdiction_classification: [type],
+          jurisdiction_classification: [license_type],
         }
       }]
     }
@@ -52,16 +56,56 @@ class OpencorporatesBotRecord < SimpleOpencBot::BaseLicenceRecord
 end
 
 class OpencorporatesBot < SimpleOpencBot
-
   # the class that `fetch_records` yields. Must be defined.
   yields OpencorporatesBotRecord
+  
+  def process_page(initial_index_page, page_number)
+    puts "Processing page #{page_number}"
+    if page_number == 1
+      index_page = initial_index_page
+    else
+      index_page = initial_index_page.form_with(:name => "Form") do |f|
+        f["__EVENTTARGET"] = "dnn$ctr1025$Default$gvSearchResult"
+        f["__EVENTARGUMENT"] = "Page$#{page_number}"
+      end.submit
+    end
+    
+    rows = index_page.search("table.fsc-grid > tr")[1..-2]
+    if rows.nil?
+      raise "No results found on page: #{index_page.root}"
+    end
+    rows.map(&:to_s).each do |row|
+      match = ROW_RE.match(row)
+      if row.nil?
+        puts "Failed to parse row: #{row}"
+      else
+        yield index_page, match[1].gsub("&amp;", "&"), match[2]
+      end
+    end
+  end
 
   # This method should yield Records. It must be defined.
   def fetch_all_records(opts={})
-    data = [{:name => "A", :type => "B"}]
-    data.each do |datum|
-      yield OpencorporatesBotRecord.new(
-        datum.merge(:reporting_date => Time.now.utc.iso8601(2)))
+    a = Mechanize.new
+    
+    # Fetch the initial index page, which contains the form data we need
+    # to request index pages by number
+    a.get(URL) do |initial_index_page|
+    
+      page_number = 1
+      index_page = initial_index_page
+      while true do
+        process_page(index_page, page_number) do |new_index_page, name, license_type|
+          puts "!!! name=#{name}, license_type=#{license_type}"
+          yield OpencorporatesBotRecord.new(
+            :name => name,
+            :license_type => license_type,
+            :reporting_date => Time.now.utc.iso8601(2)
+          )
+          index_page = new_index_page
+        end
+        page_number += 1
+      end
     end
   end
 end

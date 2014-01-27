@@ -231,3 +231,4 @@ It seems reasonable to start by finding out how to issue these requests. Looking
 
 Okay. Yes, it’s reasonably easy. The script `test.rb` appears to scrape the first few pages successfully.
 
+Right, now to roll that into the bot framework. Doesn’t seem too hard.
