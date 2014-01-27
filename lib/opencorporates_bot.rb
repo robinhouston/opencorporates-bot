@@ -55,6 +55,9 @@ class OpencorporatesBotRecord < SimpleOpencBot::BaseLicenceRecord
 
 end
 
+class NoMoreData < StandardError
+end
+
 class OpencorporatesBot < SimpleOpencBot
   # the class that `fetch_records` yields. Must be defined.
   yields OpencorporatesBotRecord
@@ -72,11 +75,11 @@ class OpencorporatesBot < SimpleOpencBot
     
     rows = index_page.search("table.fsc-grid > tr")[1..-2]
     if rows.nil?
-      raise "No results found on page: #{index_page.root}"
+      raise NoMoreData
     end
     rows.map(&:to_s).each do |row|
       match = ROW_RE.match(row)
-      if row.nil?
+      if match.nil?
         puts "Failed to parse row: #{row}"
       else
         yield index_page, match[1].gsub("&amp;", "&"), match[2]
@@ -95,16 +98,20 @@ class OpencorporatesBot < SimpleOpencBot
       page_number = 1
       index_page = initial_index_page
       while true do
-        process_page(index_page, page_number) do |new_index_page, name, license_type|
-          puts "!!! name=#{name}, license_type=#{license_type}"
-          yield OpencorporatesBotRecord.new(
-            :name => name,
-            :license_type => license_type,
-            :reporting_date => Time.now.utc.iso8601(2)
-          )
-          index_page = new_index_page
+        begin
+          process_page(index_page, page_number) do |new_index_page, name, license_type|
+            puts "  name=#{name}, license_type=#{license_type}"
+            yield OpencorporatesBotRecord.new(
+              :name => name,
+              :license_type => license_type,
+              :reporting_date => Time.now.utc.iso8601(2)
+            )
+            index_page = new_index_page
+          end
+          page_number += 1
+        rescue NoMoreData
+          break
         end
-        page_number += 1
       end
     end
   end

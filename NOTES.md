@@ -232,3 +232,10 @@ It seems reasonable to start by finding out how to issue these requests. Looking
 Okay. Yes, it’s reasonably easy. The script `test.rb` appears to scrape the first few pages successfully.
 
 Right, now to roll that into the bot framework. Doesn’t seem too hard.
+
+
+## Remarks
+
+Is there an approved way to do logging? It will be much easier to debug problems with the scraper in future if there is a detailed log of activity during the run. I have just printed log messages to standard output, but this is unsatisfactory (no timestamps, no distinction between informational messages and warnings).
+
+The `NumericIncrementer` system would almost have been useful. The trouble is that it requires an `end_val`, and on this site we don’t know in advance how many pages there are. But the scraper takes less than half an hour to run, so in this case it is not crucial to be able to resume it part-way through.
